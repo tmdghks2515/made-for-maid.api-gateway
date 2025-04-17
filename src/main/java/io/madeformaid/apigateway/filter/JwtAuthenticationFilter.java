@@ -3,8 +3,7 @@ package io.madeformaid.apigateway.filter;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import io.madeformaid.apigateway.config.JwtProperties;
-import org.springframework.beans.factory.annotation.Value;
+import io.madeformaid.shared.config.AuthProperties;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpStatus;
@@ -16,18 +15,18 @@ import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAuthenticationFilter.Config> {
     private final String HEADER = "Authorization";
     private final String PREFIX = "Bearer ";
     private final Key key;
-    private final JwtProperties jwtProperties;
-
-    public JwtAuthenticationFilter(JwtProperties jwtProperties) {
+    private final AuthProperties authProperties;
+    public JwtAuthenticationFilter(AuthProperties authProperties) {
         super(Config.class);
-        this.jwtProperties = jwtProperties;
-        this.key = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8));
+        this.authProperties = authProperties;
+        this.key = Keys.hmacShaKeyFor(authProperties.getJwt().getSecret().getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
@@ -36,7 +35,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             String path = exchange.getRequest().getPath().value();
 
             // 화이트리스트 경로 체크
-            boolean shouldSkip = jwtProperties.getIgnorePaths().stream()
+            boolean shouldSkip = authProperties.getWhitelist().stream()
                     .anyMatch(path::startsWith);
 
             if (shouldSkip) {

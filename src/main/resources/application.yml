@@ -2,7 +2,13 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: api-gateway
+  config:
+    import: "configserver:"
   cloud:
+    config:
+      uri: http://localhost:8888
     gateway:
       default-filters:
         - name: JwtAuthenticationFilter
@@ -15,8 +21,3 @@ spring:
           uri: http://localhost:8082
           predicates:
             - Path=/api/user/**
-
-jwt:
-  secret: ${JWT_SECRET}
-  ignore-paths:
-    - /api/user/auth
