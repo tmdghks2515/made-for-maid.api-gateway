@@ -10,8 +10,6 @@ spring:
     config:
       uri: http://localhost:8888
     gateway:
-      default-filters:
-        - name: JwtAuthenticationFilter
       routes:
         - id: common-service
           uri: http://localhost:8081
