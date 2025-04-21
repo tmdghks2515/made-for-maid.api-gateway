@@ -20,7 +20,9 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class JwtAuthenticationFilter implements WebFilter {
@@ -51,11 +53,14 @@ public class JwtAuthenticationFilter implements WebFilter {
                 DecodedJWT jwt = jwtTokenProvider.validateAndGetDecodedJwt(token);
 
                 // 사용자 정보 추출
-                String userId = jwt.getSubject();
-                List<String> roles = jwt.getClaim("roles").asList(String.class);
+                String accountId = jwt.getSubject();
+                String userId = jwt.getClaim("userId").asString();
+                List<String> roles = Optional.ofNullable(jwt.getClaim("roles").asList(String.class))
+                        .orElse(Collections.emptyList());
 
                 // 헤더에 사용자 정보 추가
                 ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
+                        .header("X-Account-Id", accountId)
                         .header("X-User-Id", userId)
                         .header("X-User-Roles", String.join(",", roles))
                         .build();
