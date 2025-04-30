@@ -55,6 +55,7 @@ public class JwtAuthenticationFilter implements WebFilter {
                 // 사용자 정보 추출
                 String accountId = jwt.getSubject();
                 String userId = jwt.getClaim("userId").asString();
+                String shopId = jwt.getClaim("shopId").asString();
                 List<String> roles = Optional.ofNullable(jwt.getClaim("roles").asList(String.class))
                         .orElse(Collections.emptyList());
 
@@ -62,6 +63,7 @@ public class JwtAuthenticationFilter implements WebFilter {
                 ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
                         .header("X-Account-Id", accountId)
                         .header("X-User-Id", userId)
+                        .header("X-Shop-Id", shopId)
                         .header("X-User-Roles", String.join(",", roles))
                         .build();
 
